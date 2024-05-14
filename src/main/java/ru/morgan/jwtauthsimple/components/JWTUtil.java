@@ -1,5 +1,7 @@
-package ru.morgan.jwtauthsimple.utils;
+package ru.morgan.jwtauthsimple.components;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -18,11 +20,11 @@ public class JWTUtil {
     private long accessExpiration;
     @Value("${jwt.expiration.refresh}")
     private long refreshExpiration;
-
+    private SecretKey key;
     public String generateAccessToken(String username, String digitalSignature) {
-
-        SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS512);//Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-
+        if(key == null){
+            initKey();
+        }
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
@@ -33,8 +35,9 @@ public class JWTUtil {
     }
 
     public String generateRefreshToken(String username, String digitalSignature) {
-        SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS512);//Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-
+        if(key == null){
+            initKey();
+        }
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
@@ -42,5 +45,27 @@ public class JWTUtil {
                 .signWith(key, SignatureAlgorithm.HS512)
                 .claim("digital_signature",digitalSignature)
                 .compact();
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    public String getUsernameFromToken(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+            return claims.getSubject();
+        } catch (JwtException | IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private void initKey(){
+        key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 }

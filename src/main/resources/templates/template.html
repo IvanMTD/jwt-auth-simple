@@ -7,11 +7,6 @@
     </head>
 
     <body>
-        <h1>Hello, World!</h1>
-        <hr>
-        <p>ACCESS: <span th:text="${access}"></span></p>
-        <hr>
-        <p>REFRESH: <span th:text="${refresh}"></span></p>
-        <hr>
+        <div th:insert="~{block/main-page}" th:if="${index} == 'main-page'"></div>
     </body>
 </html>
