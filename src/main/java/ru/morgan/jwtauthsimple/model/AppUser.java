@@ -24,21 +24,13 @@ public class AppUser implements UserDetails {
     private String username;
     private String password;
     private String email;
-    private String role;
+    private UserRole role;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate placedAt;
 
-    public void setRole(UserRole role){
-        this.role = role.toString();
-    }
-
-    public UserRole getRole(){
-        return UserRole.valueOf(role);
-    }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority(getRole().toString()));
+        return Collections.singletonList(new SimpleGrantedAuthority(role.toString()));
     }
 
     @Override

@@ -33,7 +33,7 @@ public class ApplicationConfig {
                         user.setEmail("admin@security.net");
                         user.setPlacedAt(LocalDate.now());
                         return userRepository.save(user).flatMap(u -> {
-                            log.info("user with username {} has been created", user.getUsername());
+                            log.info("user [{}] has been created with password [{}]", user,password);
                             return Mono.just(u);
                         });
                     })
