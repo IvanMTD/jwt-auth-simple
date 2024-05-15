@@ -2,23 +2,18 @@ package ru.morgan.jwtauthsimple.components;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-import ru.morgan.jwtauthsimple.model.AppUser;
 import ru.morgan.jwtauthsimple.services.UserService;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.time.Duration;
 
 @Slf4j
 @Component
@@ -54,10 +49,12 @@ public class JwtAuthenticationManager implements ReactiveAuthenticationManager {
                     String newRefreshToken = jwtUtil.generateRefreshToken(username, digitalSignature);
                     ResponseCookie accessCookie = ResponseCookie.from("access_token", newAccessToken)
                             .httpOnly(true)
+                            .maxAge(Duration.ofHours(1))
                             .path("/")
                             .build();
                     ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", newRefreshToken)
                             .httpOnly(true)
+                            .maxAge(Duration.ofDays(30))
                             .path("/")
                             .build();
 

@@ -14,6 +14,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
+import java.time.Duration;
 
 @Slf4j
 @Component
@@ -36,11 +37,12 @@ public class JwtAuthenticationSuccessHandler implements ServerAuthenticationSucc
         // Add tokens to cookies
         ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
                 .httpOnly(true)
+                .maxAge(Duration.ofHours(1))
                 .path("/")
                 .build();
-
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
                 .httpOnly(true)
+                .maxAge(Duration.ofDays(30))
                 .path("/")
                 .build();
 
