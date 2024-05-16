@@ -12,14 +12,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
-import org.springframework.security.web.server.authentication.logout.RedirectServerLogoutSuccessHandler;
 import org.springframework.security.web.server.csrf.ServerCsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.server.savedrequest.ServerRequestCache;
 import org.springframework.security.web.server.savedrequest.WebSessionServerRequestCache;
-import ru.morgan.jwtauthsimple.components.JWTUtil;
-import ru.morgan.jwtauthsimple.components.JwtAuthenticationConverter;
-import ru.morgan.jwtauthsimple.components.JwtAuthenticationManager;
-import ru.morgan.jwtauthsimple.components.JwtAuthenticationSuccessHandler;
+import ru.morgan.jwtauthsimple.components.*;
 import ru.morgan.jwtauthsimple.services.UserService;
 
 import java.net.URI;
@@ -31,6 +27,7 @@ import java.net.URI;
 public class SecurityConfig {
 
     private final JwtAuthenticationConverter authenticationConverter;
+    private final JwtLogoutSuccessHandler logoutSuccessHandler;
     private final UserService userService;
     private final JWTUtil jwtUtil;
 
@@ -39,12 +36,10 @@ public class SecurityConfig {
         ServerCsrfTokenRequestAttributeHandler requestHandler = new ServerCsrfTokenRequestAttributeHandler();
         requestHandler.setTokenFromMultipartDataEnabled(true);
 
-        RedirectServerLogoutSuccessHandler handler = new RedirectServerLogoutSuccessHandler();
-        handler.setLogoutSuccessUrl(URI.create("/"));
+        logoutSuccessHandler.setLogoutSuccessUrl(URI.create("/"));
 
         AuthenticationWebFilter authenticationWebFilter = new AuthenticationWebFilter(authenticationManager());
         authenticationWebFilter.setServerAuthenticationConverter(authenticationConverter);
-        //authenticationWebFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
 
         return http
                 .csrf(csrf -> csrf.csrfTokenRequestHandler(requestHandler))
@@ -52,7 +47,7 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults())
                 .formLogin(loginSpec -> loginSpec.authenticationSuccessHandler(authenticationSuccessHandler()))
                 .authorizeExchange(auth -> auth.anyExchange().authenticated())
-                .logout(logoutSpec -> logoutSpec.logoutSuccessHandler(handler))
+                .logout(logoutSpec -> logoutSpec.logoutSuccessHandler(logoutSuccessHandler))
                 .requestCache(requestCacheSpec -> requestCacheSpec.requestCache(serverRequestCache()))
                 .build();
 
@@ -77,5 +72,4 @@ public class SecurityConfig {
     public ServerRequestCache serverRequestCache() {
         return new WebSessionServerRequestCache();
     }
-
 }
